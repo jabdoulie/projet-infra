@@ -1,0 +1,19 @@
+---
+  - name: Installer Docker sur les Nodes
+    hosts: serveurs
+    become: true
+
+    tasks:
+    - name: Copier le script d'installation
+      copy:
+        src: ./docker-install.sh
+        dest: /tmp/docker-install.sh
+        mode: '0755'
+
+    - name: Exécuter le script
+      command: /bin/bash /tmp/docker-install.sh
+
+    - name: Supprimer le script
+      file:
+        path: /tmp/docker-install.sh
+        state: absent
