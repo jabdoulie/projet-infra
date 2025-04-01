@@ -17,3 +17,63 @@
       file:
         path: /tmp/docker-install.sh
         state: absent
+
+    - name: Vérifier si Docker est installé
+      command: docker --version
+      register: docker_version
+      changed_when: false
+      failed_when: false
+
+    - name: Afficher la version de Docker
+      debug:
+        msg: "Version de Docker installée: {{ docker_version.stdout }}"
+      when: docker_version.rc == 0
+
+  - name: Installer Git sur les hôtes
+    hosts: serveurs
+    become: true
+
+    tasks:
+    - name: Installer Git sur Ubuntu/Debian
+      apt:
+        name: git
+        state: present
+
+  - name: Installer Zabbix avec Docker Compose
+    hosts: monitoring
+    become: true
+    tasks:
+      - name: Créer un répertoire pour le docker-compose
+        file:
+          path: /home/monitoring
+          state: directory
+
+      - name: Cloner le dépôt Zabbix et Grafana Docker
+        git:
+          repo: https://github.com/akmalovaa/zabbix-docker.git
+          dest: /home/monitoring
+          update: yes
+
+      - name: Démarrer les services avec Docker Compose
+        command:
+          cmd: docker compose up -d
+          chdir: /home/monitoring
+
+  - name: Installer Jenkins et SonarQube
+    hosts: cicd
+    become: true
+    tasks:
+      - name: Créer un répertoire pour le docker-compose
+        file:
+          path: /home/djoan/devtools
+          state: directory
+
+      - name: Copier le fichier docker-compose.yml
+        copy:
+          src: ~/projet/services/devtools/docker-compose.yml
+          dest: /home/djoan/devtools/docker-compose.yml
+
+      - name: Démarrer les services Docker Compose
+        command: docker compose up -d
+        args:
+          chdir: /home/djoan/devtools/

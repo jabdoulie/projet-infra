@@ -134,23 +134,13 @@ resource "aws_s3_bucket" "dev_s3_bucket" {
 
 resource "local_file" "inventory_ini" {
   content = <<-EOF
-    [ci_cd]
-    ${aws_instance.my_instances[0].public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/cicd_key
-
-    [monitoring]
-    ${aws_instance.my_instances[1].public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/monitoring_key
-
-    [prod]
-    ${aws_instance.my_instances[2].public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/prod_key
-
-    [prod-2]
-    ${aws_instance.my_instances[3].public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/prod-2_key
-
-    [test]
-    ${aws_instance.my_instances[4].public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/test_key
-
-    [bdd]
-    ${aws_instance.my_instances[5].public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/bdd_key
+    [serveurs]
+    monitoring ansible_host=${aws_instance.my_instances[0].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/monitoring_key
+    bdd ansible_host=${aws_instance.my_instances[1].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/bdd_key
+    prod ansible_host=${aws_instance.my_instances[2].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/prod_key
+    prod-2 ansible_host=${aws_instance.my_instances[3].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/prod-2_key
+    test ansible_host=${aws_instance.my_instances[4].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/test_key
+    cicd ansible_host=${aws_instance.my_instances[5].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/cicd_key
 
     [all:vars]
     ansible_python_interpreter=/usr/bin/python3
