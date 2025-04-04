@@ -70,7 +70,7 @@
 
       - name: Copier le fichier docker-compose.yml
         copy:
-          src: ~/projet/services/devtools/docker-compose.yml
+          src: ./docker-compose.yml
           dest: /home/djoan/devtools/docker-compose.yml
 
       - name: Démarrer les services Docker Compose
