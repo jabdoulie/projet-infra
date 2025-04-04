@@ -1,16 +1,26 @@
-# Génération automatique des clés SSH pour chaque instance
 resource "tls_private_key" "instance_keys" {
-  for_each = toset(var.instance_names)  # Crée une clé pour chaque instance
+  for_each = toset(var.instance_names)
 
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 resource "aws_key_pair" "instance_keys" {
-  for_each = toset(var.instance_names)  # Crée une paire de clés pour chaque instance
+  for_each = toset(var.instance_names)
 
   key_name   = each.key
   public_key = tls_private_key.instance_keys[each.key].public_key_openssh
+
+}
+
+resource "local_file" "private_key_files" {
+  for_each = toset(var.instance_names)
+
+  filename = "./keys/${each.key}_private_key.pem"
+  content  = tls_private_key.instance_keys[each.key].private_key_pem
+
+  # On s'assure que le répertoire existe avant d'écrire
+  directory_permission = "0700"
 }
 
 # Création de la VPC
@@ -135,17 +145,17 @@ resource "aws_s3_bucket" "dev_s3_bucket" {
 resource "local_file" "inventory_ini" {
   content = <<-EOF
     [serveurs]
-    monitoring ansible_host=${aws_instance.my_instances[0].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/monitoring_key
-    bdd ansible_host=${aws_instance.my_instances[1].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/bdd_key
-    prod ansible_host=${aws_instance.my_instances[2].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/prod_key
-    prod-2 ansible_host=${aws_instance.my_instances[3].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/prod-2_key
-    test ansible_host=${aws_instance.my_instances[4].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/test_key
-    cicd ansible_host=${aws_instance.my_instances[5].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=~/.ssh/cicd_key
+    monitoring ansible_host=${aws_instance.my_instances[0].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/Monitoring_private_key.pem
+    bdd ansible_host=${aws_instance.my_instances[1].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/BDD_private_key.pem
+    prod ansible_host=${aws_instance.my_instances[2].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/Prod_private_key.pem
+    prod-2 ansible_host=${aws_instance.my_instances[3].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/Prod-2_private_key.pem
+    test ansible_host=${aws_instance.my_instances[4].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/Test_private_key.pem
+    cicd ansible_host=${aws_instance.my_instances[5].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/CI-CD_private_key.pem
 
     [all:vars]
     ansible_python_interpreter=/usr/bin/python3
   EOF
 
   # Le fichier sera stocké à la racine du projet
-  filename = "./inventory.ini"
+  filename = "../Ansible/inventory.ini"
 }
