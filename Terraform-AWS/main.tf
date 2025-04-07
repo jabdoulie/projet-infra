@@ -16,7 +16,7 @@ resource "aws_key_pair" "instance_keys" {
 resource "local_file" "private_key_files" {
   for_each = toset(var.instance_names)
 
-  filename = "./keys/${each.key}_private_key.pem"
+  filename = "../Ansible/keys/${each.key}_private_key.pem"
   content  = tls_private_key.instance_keys[each.key].private_key_pem
 
   # On s'assure que le répertoire existe avant d'écrire
@@ -145,12 +145,12 @@ resource "aws_s3_bucket" "dev_s3_bucket" {
 resource "local_file" "inventory_ini" {
   content = <<-EOF
     [serveurs]
-    monitoring ansible_host=${aws_instance.my_instances[0].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/Monitoring_private_key.pem
-    bdd ansible_host=${aws_instance.my_instances[1].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/BDD_private_key.pem
-    prod ansible_host=${aws_instance.my_instances[2].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/Prod_private_key.pem
-    prod-2 ansible_host=${aws_instance.my_instances[3].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/Prod-2_private_key.pem
-    test ansible_host=${aws_instance.my_instances[4].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/Test_private_key.pem
-    cicd ansible_host=${aws_instance.my_instances[5].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=../Terraform-AWS/keys/CI-CD_private_key.pem
+    ${var.instance_names[0]} ansible_host=${aws_instance.my_instances[0].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[0]}_private_key.pem
+    ${var.instance_names[1]} ansible_host=${aws_instance.my_instances[1].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[1]}_private_key.pem
+    ${var.instance_names[2]} ansible_host=${aws_instance.my_instances[2].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[2]}_private_key.pem
+    ${var.instance_names[3]} ansible_host=${aws_instance.my_instances[3].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[3]}_private_key.pem
+    ${var.instance_names[4]} ansible_host=${aws_instance.my_instances[4].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[4]}_private_key.pem
+    ${var.instance_names[5]} ansible_host=${aws_instance.my_instances[5].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[5]}_private_key.pem
 
     [all:vars]
     ansible_python_interpreter=/usr/bin/python3
