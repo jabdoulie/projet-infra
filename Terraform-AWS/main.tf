@@ -84,10 +84,11 @@ resource "aws_security_group" "instance_sgs" {
   dynamic "ingress" {
     for_each = each.value == "CI/CD" ? [
       { from_port = 8080, to_port = 8080, protocol = "tcp" },
-      { from_port = 9000, to_port = 9000, protocol = "tcp" }
-    ] : each.value == "Prod" || each.value == "Prod-2" ? [
+      { from_port = 9000, to_port = 9000, protocol = "tcp" },
+      { from_port = 22, to_port = 22, protocol = "tcp" }
+    ] : each.value == "Prod" ? [
       { from_port = 8080, to_port = 8080, protocol = "tcp" },
-      { from_port = 8000, to_port = 8000, protocol = "tcp" }
+      { from_port = 22, to_port = 22, protocol = "tcp" }
     ] : each.value == "Test" ? [
       { from_port = 22, to_port = 22, protocol = "tcp" }
     ] : each.value == "Monitoring" ? [
@@ -150,7 +151,6 @@ resource "local_file" "inventory_ini" {
     ${var.instance_names[2]} ansible_host=${aws_instance.my_instances[2].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[2]}_private_key.pem
     ${var.instance_names[3]} ansible_host=${aws_instance.my_instances[3].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[3]}_private_key.pem
     ${var.instance_names[4]} ansible_host=${aws_instance.my_instances[4].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[4]}_private_key.pem
-    ${var.instance_names[5]} ansible_host=${aws_instance.my_instances[5].public_ip} ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=./keys/${var.instance_names[5]}_private_key.pem
 
     [all:vars]
     ansible_python_interpreter=/usr/bin/python3
@@ -158,4 +158,16 @@ resource "local_file" "inventory_ini" {
 
   # Le fichier sera stocké à la racine du projet
   filename = "../Ansible/inventory.ini"
+}
+
+# Appliquer les droits 600 sur les fichiers de clés
+resource "null_resource" "chmod_private_keys" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      chmod 600 ../Ansible/keys/*_private_key.pem
+    EOT
+  }
+
+  # Assurer que la ressource est exécutée après la création du fichier d'inventaire
+  depends_on = [local_file.inventory_ini]
 }

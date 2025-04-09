@@ -13,5 +13,5 @@ variable "instance_count" {
 variable "instance_names" {
   description = "Les noms des instances à créer"
   type        = list(string)
-  default     = ["Monitoring", "Prod", "CI-CD", "Test", "Prod-2", "BDD"]  # Noms d'instances par défaut
+  default     = ["Monitoring", "Prod", "CI-CD", "Test", "BDD"]  # Noms d'instances par défaut
 }
