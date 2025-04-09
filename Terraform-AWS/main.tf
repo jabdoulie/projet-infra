@@ -82,12 +82,9 @@ resource "aws_security_group" "instance_sgs" {
   vpc_id      = aws_vpc.dev_vpc.id
 
   dynamic "ingress" {
-    for_each = each.value == "CI/CD" ? [
-      { from_port = 8080, to_port = 8080, protocol = "tcp" },
-      { from_port = 9000, to_port = 9000, protocol = "tcp" },
+    for_each = each.value == "CI-CD" ? [
       { from_port = 22, to_port = 22, protocol = "tcp" }
     ] : each.value == "Prod" ? [
-      { from_port = 8080, to_port = 8080, protocol = "tcp" },
       { from_port = 22, to_port = 22, protocol = "tcp" }
     ] : each.value == "Test" ? [
       { from_port = 22, to_port = 22, protocol = "tcp" }

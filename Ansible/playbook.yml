@@ -40,7 +40,7 @@
         state: present
 
   - name: Installer Zabbix avec Docker Compose
-    hosts: monitoring
+    hosts: Monitoring
     become: true
     tasks:
       - name: Créer un répertoire pour le docker-compose
@@ -60,7 +60,7 @@
           chdir: /home/monitoring
 
   - name: Installer Jenkins et SonarQube
-    hosts: cicd
+    hosts: CI-CD
     become: true
     tasks:
       - name: Créer un répertoire pour le docker-compose
