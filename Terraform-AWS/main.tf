@@ -90,8 +90,7 @@ resource "aws_security_group" "instance_sgs" {
       { from_port = 22, to_port = 22, protocol = "tcp" }
     ] : each.value == "Monitoring" ? [
       { from_port = 22, to_port = 22, protocol = "tcp" }
-    ] : each.value == "BDD" ? [
-      { from_port = 3306, to_port = 3306, protocol = "tcp" },  
+    ] : each.value == "BDD" ? [ 
       { from_port = 22, to_port = 22, protocol = "tcp" }        
     ] : []
 
